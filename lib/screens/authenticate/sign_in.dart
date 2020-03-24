@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:testlogin/services/auth.dart';
+import 'package:testlogin/shared/constants.dart';
+import 'package:testlogin/shared/loading.dart';
 
 class SignIn extends StatefulWidget {
   
@@ -14,7 +16,8 @@ class _SignInState extends State<SignIn> {
 
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
-  
+  bool loading = false;
+
   //text field state
   String email = '';
   String password = '';
@@ -22,7 +25,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? Loading() : Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue,
@@ -46,6 +49,7 @@ class _SignInState extends State<SignIn> {
             children: <Widget>[
               SizedBox(height: 20,),
               TextFormField(
+                decoration: textInputDecoration.copyWith(hintText: 'Email'),
                 validator: (val) => val.isEmpty ? 'Enter an email' : null,
                 onChanged: (val) {
                   setState(() => email = val);
@@ -53,6 +57,7 @@ class _SignInState extends State<SignIn> {
               ),
               SizedBox(height: 20,),
               TextFormField(
+                decoration: textInputDecoration.copyWith(hintText: 'Password'),
                 obscureText: true,
                 validator: (val) => val.length < 6 ? 'Your password must be at least 6 characters long.' : null,
                 onChanged: (val) {
@@ -68,9 +73,13 @@ class _SignInState extends State<SignIn> {
                 ),
                 onPressed: () async {
                   if (_formKey.currentState.validate()){
+                    setState(() => loading = true);
                     dynamic result = await _auth.signin(email, password);
                     if (result == null) {
-                      setState(() => error = 'Invalid email or password');
+                      setState(() {
+                        error = 'Invalid email or password';
+                        loading = false;
+                      });
                     }
                   }
                 },
